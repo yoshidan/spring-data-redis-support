@@ -10,23 +10,27 @@
  
 * Writerの方はVIPを利用せずにSentinelを利用しても問題ありません。
 
-## Repository
+## How to use
+
+### Repository
 
 http://nysd.github.io/archivar/
 
-## Dependency 
+### Dependency 
 
-### maven
+* spring-data-redis-wrapperのバージョンはspring-data-redisのリリースバージョンに対応しています。
+
+#### maven
 
 ```
 <dependency>
 	<groupId>spring.wrapper</groupId>
 	<artifactId>spring-data-redis-wrapper</groupId>
-	<version>1.4.3-SNAPSHOT</version>
+	<version>1.4.3</version>
 </dependency>
 ```
 
-### gradle
+#### gradle
 
 ```
 dependencies {
@@ -34,9 +38,16 @@ dependencies {
 }
 ```
 
-## Configuration
+### Configuration
+
+* 以下は例です。設定値の実際はapplication.ymlに記載してspring-boot-autoconfigureのRedisProperties経由で取得するのがよいです。
+* spring-boot-autoconfigureで自動的に登録されるRedisTemplate/JedisConnectionFactoryは混乱の元なのでBean化しないことをおすすめします。
+* JedisConnectionFactoryもBeanにしておけば何もせずにspring-boot-actuatorがRead/Write双方にヘルスチェックしてくれます。
 
 ```
+@Configuration
+@EnableCaching
+public class RedisConfiguraiont {
   @Bean
   public RedisTemplate<Object,Object> reader() {
     RedisTemplate<Object,Object> reader = new RedisTemplate<Object,Object>();  
@@ -59,7 +70,6 @@ dependencies {
       @Qualifier("writer") RedisTemplate<Object,Object> writer) {   
     return new ReplicatedRedisCacheManager(reader, writer);
   }
-  
+}
 ```
-
 
