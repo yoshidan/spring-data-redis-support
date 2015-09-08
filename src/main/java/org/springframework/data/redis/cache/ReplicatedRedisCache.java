@@ -39,12 +39,12 @@ public class ReplicatedRedisCache extends RedisCache{
 	 * @see RedisCache#RedisCache(String, byte[], RedisTemplate, long)
 	 */
 	public ReplicatedRedisCache(String name, byte[] prefix, 
-			RedisTemplate<? extends Object, ? extends Object> readTemplate,
 			RedisTemplate<? extends Object, ? extends Object> writeTemplate,
+			RedisTemplate<? extends Object, ? extends Object> readTemplate,
 			long expiration) {
 
-		super(name,prefix,readTemplate,expiration);
-		this.readTemplate = writeTemplate;
+		super(name,prefix,writeTemplate,expiration);
+		this.readTemplate = readTemplate;
 		this.prefix = prefix;
 		StringRedisSerializer stringSerializer = new StringRedisSerializer();		
 		this.cacheLockName = stringSerializer.serialize(name + "~lock");
