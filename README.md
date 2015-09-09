@@ -25,8 +25,8 @@ http://nysd.github.io/archivar/
 
 ```
 <dependency>
-	<groupId>spring.wrapper</groupId>
-	<artifactId>spring-data-redis-wrapper</groupId>
+	<groupId>spring.support</groupId>
+	<artifactId>spring-data-redis-support</groupId>
 	<version>1.4.3</version>
 </dependency>
 ```
@@ -35,7 +35,7 @@ http://nysd.github.io/archivar/
 
 ```
 dependencies {
-    compile 'spring.wrapper:spring-data-redis-wrapper:1.4.3'
+    compile 'spring.support:spring-data-redis-support:1.4.3'
 }
 ```
 
