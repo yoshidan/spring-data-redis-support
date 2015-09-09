@@ -1,4 +1,4 @@
-# spring-data-redis-wrapper
+# spring-data-redis-support
 
  * 標準のRedisCacheManagerは一つのRedisTemplateしか扱えないため、複数のRedisTemplateを扱えるようにします。
 
