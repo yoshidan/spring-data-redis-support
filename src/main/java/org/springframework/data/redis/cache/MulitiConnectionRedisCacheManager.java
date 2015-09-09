@@ -10,15 +10,15 @@ import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 
-public class ReplicatedRedisCacheManager extends RedisCacheManager{
+public class MulitiConnectionRedisCacheManager extends RedisCacheManager{
 
 	private RedisTemplate<?,?> readTemplate;
 	
-	public ReplicatedRedisCacheManager(RedisTemplate<?,?> forRead , RedisTemplate<?,?> forWrite) {
+	public MulitiConnectionRedisCacheManager(RedisTemplate<?,?> forRead , RedisTemplate<?,?> forWrite) {
 		this(forRead, forWrite,Collections.<String> emptyList());
 	}
 	
-	public ReplicatedRedisCacheManager(RedisTemplate<?,?> forRead, RedisTemplate<?,?> forWrite,Collection<String> cacheNames) {
+	public MulitiConnectionRedisCacheManager(RedisTemplate<?,?> forRead, RedisTemplate<?,?> forWrite,Collection<String> cacheNames) {
 		super(forWrite,cacheNames);
 		this.readTemplate = forRead;
 	}
@@ -27,7 +27,7 @@ public class ReplicatedRedisCacheManager extends RedisCacheManager{
 	@Override
 	protected RedisCache createCache(String cacheName) {
 		long expiration = computeExpiration(cacheName);
-		return new ReplicatedRedisCache(cacheName, 
+		return new MultiConnectionRedisCache(cacheName, 
 				(isUsePrefix() ? getCachePrefix().prefix(cacheName) : null), 
 				getTemplate(), readTemplate, expiration);
 	}
