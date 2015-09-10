@@ -3,103 +3,62 @@
  */
 package org.springframework.data.redis.cache;
 
-import java.util.Arrays;
+import static org.springframework.util.Assert.notNull;
 
-import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.core.RedisOperations;
 
-@SuppressWarnings(value={"rawtypes","unchecked"}) 
+/**
+ * use read only RedisOperations for get.
+ * 
+ * @author yoshidan
+ */
 public class MasterSlaveRedisCache extends RedisCache{
 	
-	private final RedisTemplate readTemplate;
-	private final byte[] prefix;
-	private final byte[] cacheLockName;
-	private long WAIT_FOR_LOCK = 300;
+    @SuppressWarnings("rawtypes")
+    private final RedisOperations redisReadOperations;
+    private final RedisCacheMetadata cacheMetadata;
+    private final CacheValueAccessor cacheValueAccessor;
 	
+    /**
+     * Constructs a new <code>MasterSlaveRedisCache</code> instance.
+     * 
+     * @param name cache name
+     * @param prefix
+     * @param redisOperations
+     * @param expiration
+     */
+	public MasterSlaveRedisCache(String name, byte[] prefix, RedisOperations<? extends Object, ? extends Object> redisOperations,
+        long expiration,RedisOperations<? extends Object, ? extends Object> redisReadOperations) {
+	  super(name,prefix,redisOperations,expiration);
+	  
+	  this.redisReadOperations = redisReadOperations;
+	  this.cacheMetadata = new RedisCacheMetadata(name, prefix);
+      this.cacheMetadata.setDefaultExpiration(expiration);
+      
+      this.cacheValueAccessor = new CacheValueAccessor(redisOperations.getValueSerializer());
+	}
+
+	/**
+	 * @see RedisCache#get(RedisCacheKey)
+	 */	
+	@SuppressWarnings("unchecked")
 	@Override
-	public ValueWrapper get(final Object key) {
-      return (ValueWrapper) readTemplate.execute(new RedisCallback<ValueWrapper>() {
+    public RedisCacheElement get(final RedisCacheKey cacheKey) {
 
-          public ValueWrapper doInRedis(RedisConnection connection) throws DataAccessException {
-              waitForLock(connection);
-              byte[] bs = connection.get(computeKey(key));
-              Object value = readTemplate.getValueSerializer() != null ? readTemplate.getValueSerializer().deserialize(bs) : bs;
-              return (bs == null ? null : new SimpleValueWrapper(value));
-          }
-      }, true);
-  }
+        notNull(cacheKey, "CacheKey must not be null!");
+        
+        byte[] bytes = (byte[]) redisReadOperations.execute(new AbstractRedisCacheCallback<byte[]>(new BinaryRedisCacheElement(
+                new RedisCacheElement(cacheKey, null), cacheValueAccessor), cacheMetadata) {
 
-	/**
-	 * @see RedisCache#RedisCache(String, byte[], RedisTemplate, long)
-	 */
-	public MasterSlaveRedisCache(String name, byte[] prefix, 
-			RedisTemplate<? extends Object, ? extends Object> writeTemplate,
-			RedisTemplate<? extends Object, ? extends Object> readTemplate,
-			long expiration) {
+            @Override
+            public byte[] doInRedis(BinaryRedisCacheElement element, RedisConnection connection) throws DataAccessException {
+                return connection.get(element.getKeyBytes());
+            }
+        });
 
-		super(name,prefix,writeTemplate,expiration);
-		this.readTemplate = readTemplate;
-		this.prefix = prefix;
-		StringRedisSerializer stringSerializer = new StringRedisSerializer();		
-		this.cacheLockName = stringSerializer.serialize(name + "~lock");
-	}
-
-	/**
-	 * @see RedisCache#computeKey
-	 */
-	private byte[] computeKey(Object key) {
-
-		byte[] keyBytes = convertToBytesIfNecessary(readTemplate.getKeySerializer(), key);
-
-		if (prefix == null || prefix.length == 0) {
-			return keyBytes;
-		}
-
-		byte[] result = Arrays.copyOf(prefix, prefix.length + keyBytes.length);
-		System.arraycopy(keyBytes, 0, result, prefix.length, keyBytes.length);
-
-		return result;
-	}
-
-	/**
-	 * @see RedisCache#waitForLock
-	 */
-	private boolean waitForLock(RedisConnection connection) {
-
-		boolean retry;
-		boolean foundLock = false;
-		do {
-			retry = false;
-			if (connection.exists(cacheLockName)) {
-				foundLock = true;
-				try {
-					Thread.sleep(WAIT_FOR_LOCK);
-				} catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
-				retry = true;
-			}
-		} while (retry);
-
-		return foundLock;
-	}
-
-	/**
-	 * @see RedisCache#convertToBytesIfNecessary
-	 */
-	private byte[] convertToBytesIfNecessary(RedisSerializer<Object> serializer, Object value) {
-
-		if (serializer == null && value instanceof byte[]) {
-			return (byte[]) value;
-		}
-
-		return serializer.serialize(value);
-	}
+        return (bytes == null ? null : new RedisCacheElement(cacheKey, cacheValueAccessor.deserializeIfNecessary(bytes)));
+    }
 
 }

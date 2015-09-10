@@ -43,7 +43,7 @@ public class ApplicationContext {
   @Autowired
   public CacheManager cacheManager(@Qualifier("reader") RedisTemplate<Object,Object> reader ,
       @Qualifier("writer") RedisTemplate<Object,Object> writer) {   
-    return new MasterSlaveRedisCacheManager(reader, writer);
+    return new MasterSlaveRedisCacheManager(writer, reader);
   }
   
   private JedisConnectionFactory createJedisConnectionFactory(String host ,int port) {
