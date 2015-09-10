@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = {ApplicationContext.class})
-public class MultiConnectionRedisCacheTest extends Assert{
+public class MasterSlaveRedisCacheTest extends Assert{
   
   @Autowired
   private TestRepository testRepository;

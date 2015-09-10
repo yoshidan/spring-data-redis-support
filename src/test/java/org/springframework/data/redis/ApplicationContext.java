@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.cache.MulitiConnectionRedisCacheManager;
+import org.springframework.data.redis.cache.MasterSlaveRedisCacheManager;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -43,7 +43,7 @@ public class ApplicationContext {
   @Autowired
   public CacheManager cacheManager(@Qualifier("reader") RedisTemplate<Object,Object> reader ,
       @Qualifier("writer") RedisTemplate<Object,Object> writer) {   
-    return new MulitiConnectionRedisCacheManager(reader, writer);
+    return new MasterSlaveRedisCacheManager(reader, writer);
   }
   
   private JedisConnectionFactory createJedisConnectionFactory(String host ,int port) {

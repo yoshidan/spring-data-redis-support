@@ -15,7 +15,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @SuppressWarnings(value={"rawtypes","unchecked"}) 
-public class MultiConnectionRedisCache extends RedisCache{
+public class MasterSlaveRedisCache extends RedisCache{
 	
 	private final RedisTemplate readTemplate;
 	private final byte[] prefix;
@@ -38,7 +38,7 @@ public class MultiConnectionRedisCache extends RedisCache{
 	/**
 	 * @see RedisCache#RedisCache(String, byte[], RedisTemplate, long)
 	 */
-	public MultiConnectionRedisCache(String name, byte[] prefix, 
+	public MasterSlaveRedisCache(String name, byte[] prefix, 
 			RedisTemplate<? extends Object, ? extends Object> writeTemplate,
 			RedisTemplate<? extends Object, ? extends Object> readTemplate,
 			long expiration) {
