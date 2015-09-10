@@ -1,6 +1,6 @@
 # spring-data-redis-support
 
- * 標準のRedisCacheManagerは一つのRedisTemplateしか扱えないため、複数のRedisTemplateを扱えるようにします。
+標準のRedisCacheManagerは一つのRedisTemplateしか扱えないため、複数のRedisTemplateを扱えるようにします。
 
 ## Use case
 
@@ -18,14 +18,15 @@ http://nysd.github.io/archivar/
 
 ### Dependency 
 
-* spring-data-redis-wrapperのバージョンはspring-data-redisのリリースバージョンに対応しています。
+* spring-data-redis-supportのバージョンはspring-data-redisのリリースバージョンに対応しています。
+* spring bootのRELEAASEバージョンが依存するspring-data-redisのバージョンのみ対応しています。
 
 #### maven
 
 ```
 <dependency>
-	<groupId>spring.wrapper</groupId>
-	<artifactId>spring-data-redis-wrapper</groupId>
+	<groupId>spring.support</groupId>
+	<artifactId>spring-data-redis-support</groupId>
 	<version>1.4.3</version>
 </dependency>
 ```
@@ -34,7 +35,7 @@ http://nysd.github.io/archivar/
 
 ```
 dependencies {
-    compile 'spring.wrapper:spring-data-redis-wrapper:1.4.3'
+    compile 'spring.support:spring-data-redis-support:1.4.3'
 }
 ```
 
