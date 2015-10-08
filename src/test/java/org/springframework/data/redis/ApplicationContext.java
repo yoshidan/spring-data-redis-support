@@ -40,10 +40,24 @@ public class ApplicationContext {
   @Autowired
   TestRepository testRepository;
 
+  @Autowired
+  MultiConnectionRedisTemplate<Object,Object> template;
+
+  @Autowired
+  @Qualifier("writer")
+  RedisTemplate<Object,Object> master;
+
   @RequestMapping("/{key}")
   @ResponseBody
   public Object cache(@PathVariable String key){
     return testRepository.pingPong(key);
+  }
+
+  @RequestMapping("/data/{key}")
+  @ResponseBody
+  public Object data(@PathVariable String key){
+    master.opsForZSet().add(key,key + System.nanoTime(), System.nanoTime());
+    return template.opsForZSet().reverseRange(key, 0 , 10);
   }
 
   public static void main(String[] args) throws Exception {
