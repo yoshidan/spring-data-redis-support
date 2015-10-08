@@ -4,6 +4,6 @@
 .settings
 
 .idea
-.iml
-.iws
-.ipr
+*.iml
+*.iws
+*.ipr
