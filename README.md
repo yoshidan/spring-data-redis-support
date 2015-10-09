@@ -6,31 +6,25 @@
 * [RedisCacheManagerで複数のRedisTemplateを利用する](./docs/cache.md)
 * [複数のRedisから読み取り負荷分散を行う](./docs/loadbalance.md)
 
-## How to use
+## 使い方
 
-### Repository
+```
+<repositories>
+    <repository>
+        <id>nysd.maven</id>
+        <name>nysd maven repository</name>
+        <url>http://nysd.github.io/archivar/</url>
+		</repository>
+</repositories>
 
-http://nysd.github.io/archivar/
-
-### Dependency
+<deppendencies>
+    <dependency>
+        <groupId>spring.support</groupId>
+        <artifactId>spring-data-redis-support</groupId>
+        <version>1.6.0</version>
+    </dependency>
+</dependencies>
+```
 
 * spring-data-redis-supportのバージョンはspring-data-redisのリリースバージョンに対応しています。
 * spring bootのRELEASEバージョンが依存するspring-data-redisのバージョンのみ対応しています。
-
-#### maven
-
-```
-<dependency>
-	<groupId>spring.support</groupId>
-	<artifactId>spring-data-redis-support</groupId>
-	<version>1.6.0</version>
-</dependency>
-```
-
-#### gradle
-
-```
-dependencies {
-    compile 'spring.support:spring-data-redis-support:1.6.0'
-}
-```
