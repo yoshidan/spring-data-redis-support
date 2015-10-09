@@ -3,7 +3,6 @@
  */
 package org.springframework.data.redis;
 
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -15,17 +14,15 @@ import org.springframework.data.redis.cache.MasterSlaveRedisCacheManager;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.connection.jedis.JedisSentinelConnection;
 import org.springframework.data.redis.core.MultiConnectionRedisTemplate;
-import org.springframework.data.redis.core.RedisObservable;
+import org.springframework.data.redis.core.RedisState;
+import org.springframework.data.redis.core.RandomAliveRedisSupplier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import sun.misc.Cache;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -57,7 +54,7 @@ public class ApplicationContext {
   @ResponseBody
   public Object data(@PathVariable String key){
     master.opsForZSet().add(key,key + System.nanoTime(), System.nanoTime());
-    return template.opsForZSet().reverseRange(key, 0 , 10);
+    return template.opsForZSet().reverseRange(key, 0, 10);
   }
 
   public static void main(String[] args) throws Exception {
@@ -66,26 +63,26 @@ public class ApplicationContext {
 
   @Bean
   @Autowired
-  public RedisObservable<Object,Object> reader2observable(@Qualifier("reader2") RedisTemplate reader) {
-    return new RedisObservable<>(reader);
+  public RedisState<Object,Object> reader2observable(@Qualifier("reader2") RedisTemplate reader) {
+    return new RedisState<>(reader);
   }
 
   @Bean
   @Autowired
-  public RedisObservable<Object,Object> readerObservable(@Qualifier("reader") RedisTemplate reader) {
-    return new RedisObservable<>(reader);
+  public RedisState<Object,Object> readerObservable(@Qualifier("reader") RedisTemplate reader) {
+    return new RedisState<>(reader);
   }
 
   @Bean
   @Autowired
-  public RedisObservable<Object,Object> writerObservable(@Qualifier("readerMaster") RedisTemplate reader) {
-    return new RedisObservable<>(reader);
+  public RedisState<Object,Object> writerObservable(@Qualifier("readerMaster") RedisTemplate reader) {
+    return new RedisState<>(reader);
   }
 
   @Bean
   @Autowired
-  public MultiConnectionRedisTemplate<Object,Object> multiReader(Collection<RedisObservable<Object,Object>> obs) {
-    return new MultiConnectionRedisTemplate<>(obs);
+  public MultiConnectionRedisTemplate<Object,Object> multiReader(Collection<RedisState<Object,Object>> obs) {
+    return new MultiConnectionRedisTemplate<>(new RandomAliveRedisSupplier(obs));
   }
 
   @Bean
@@ -129,7 +126,7 @@ public class ApplicationContext {
   public CacheManager cacheManager(MultiConnectionRedisTemplate<Object,Object> reader ,
       @Qualifier("writer") RedisTemplate<Object,Object> writer) {
     MasterSlaveRedisCacheManager m = new MasterSlaveRedisCacheManager(writer, reader);
-    m.setDefaultExpiration(1);
+   // m.setDefaultExpiration(1);
     return m;
   }
   

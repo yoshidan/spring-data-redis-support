@@ -7,20 +7,21 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-import java.util.Observable;
-
 /**
  * Created by yoshidan on 2015/09/28.
  */
-public class RedisObservable<K,V> extends Observable implements InitializingBean, DisposableBean{
+public class RedisState<K,V> implements InitializingBean, DisposableBean{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisObservable.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisState.class);
 
     /** redis template . */
     private final RedisTemplate<K,V> redisTemplate;
 
     /** interval msec */
     private int checkInterval = 5000;
+
+    /** alive. */
+    private boolean alive = true;
 
     /** lister thread. */
     private Listener listener = new Listener();
@@ -30,8 +31,15 @@ public class RedisObservable<K,V> extends Observable implements InitializingBean
      *
      * @param redisTemplate to set
      */
-    public RedisObservable(RedisTemplate<K,V> redisTemplate){
+    public RedisState(RedisTemplate<K, V> redisTemplate){
         this.redisTemplate = redisTemplate;
+    }
+
+    /**
+     * @return RedisTemplate
+     */
+    public RedisTemplate<K,V> getRedisTemplate(){
+        return this.redisTemplate;
     }
 
     /**
@@ -39,20 +47,6 @@ public class RedisObservable<K,V> extends Observable implements InitializingBean
      */
     public void setCheckInterval(int checkInterval) {
         this.checkInterval = checkInterval;
-    }
-
-    /**
-     * @return checkInterval
-     */
-    protected int getCheckInterval(){
-        return this.checkInterval;
-    }
-
-    /**
-     * @return RedisTemplate
-     */
-    protected RedisTemplate<K,V> getRedisTemplate(){
-        return this.redisTemplate;
     }
 
     @Override
@@ -65,36 +59,33 @@ public class RedisObservable<K,V> extends Observable implements InitializingBean
         listener.running = false;
     }
 
+    /**
+     * @return true alive / false dead
+     */
+    public boolean isAlive() {
+        return alive;
+    }
 
     private class Listener extends Thread {
-
-        private boolean alive = true;
 
         private boolean running = true;
 
         @Override
         public void run() {
-            RedisConnectionFactory factory = getRedisTemplate().getConnectionFactory();
+            RedisConnectionFactory factory = redisTemplate.getConnectionFactory();
             while(running) {
                 RedisConnection connection = RedisConnectionUtils.getConnection(factory);
                 try {
                     connection.ping();
-                    if( !alive ) {
-                        setChanged();
-                        alive = !alive;
-                    }
+                    alive = true;
                 } catch (Throwable t) {
                     LOGGER.error("redis connection error : " + t.getMessage());
                     if(LOGGER.isDebugEnabled()){
                         LOGGER.debug(t.getMessage(),t);
                     }
-                    if( alive ) {
-                        setChanged();
-                        alive = !alive;
-                    }
+                    alive = false;
                 } finally {
                     RedisConnectionUtils.releaseConnection(connection, factory);
-                    notifyObservers(alive);
                     sleep();
                 }
             }
@@ -106,7 +97,7 @@ public class RedisObservable<K,V> extends Observable implements InitializingBean
          */
         private void sleep(){
             try {
-                Thread.sleep(getCheckInterval());
+                Thread.sleep(checkInterval);
             }catch(InterruptedException e){
                 LOGGER.warn(e.getMessage(),e);
             }

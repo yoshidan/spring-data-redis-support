@@ -17,296 +17,296 @@ import java.util.concurrent.TimeUnit;
  */
 public class MultiConnectionRedisTemplate<K,V> implements RedisOperations<K,V> {
 
-    /** observe redis state. */
-    private final RedisObserver<K,V> observer;
+    /** redis supplier. */
+    private final RedisSupplier<K,V> supplier;
 
     /**
      * Constructor.
      *
-     * @param redisObservables to set
+     * @param supplier to set
      */
-    public MultiConnectionRedisTemplate(Collection<RedisObservable<K,V>> redisObservables){
-        observer = new RedisObserver<>(redisObservables);
+    public MultiConnectionRedisTemplate(RandomAliveRedisSupplier<K,V> supplier) {
+        this.supplier = supplier;
     }
 
     @Override
     public <T> T execute(RedisCallback<T> action) {
-        return observer.select().execute(action);
+        return supplier.get().execute(action);
     }
 
     @Override
     public <T> T execute(SessionCallback<T> session) {
-        return observer.select().execute(session);
+        return supplier.get().execute(session);
     }
 
     @Override
     public List<Object> executePipelined(RedisCallback<?> action) {
-        return observer.select().executePipelined(action);
+        return supplier.get().executePipelined(action);
     }
 
     @Override
     public List<Object> executePipelined(RedisCallback<?> action, RedisSerializer<?> resultSerializer) {
-        return observer.select().executePipelined(action,resultSerializer);
+        return supplier.get().executePipelined(action,resultSerializer);
     }
 
     @Override
     public List<Object> executePipelined(SessionCallback<?> session) {
-        return observer.select().executePipelined(session);
+        return supplier.get().executePipelined(session);
     }
 
     @Override
     public List<Object> executePipelined(SessionCallback<?> session, RedisSerializer<?> resultSerializer) {
-        return observer.select().executePipelined(session,resultSerializer);
+        return supplier.get().executePipelined(session,resultSerializer);
     }
 
     @Override
     public <T> T execute(RedisScript<T> script, List<K> keys, Object... args) {
-        return observer.select().execute(script, keys, args);
+        return supplier.get().execute(script, keys, args);
     }
 
     @Override
     public <T> T execute(RedisScript<T> script, RedisSerializer<?> argsSerializer, RedisSerializer<T> resultSerializer, List<K> keys, Object... args) {
-        return observer.select().execute(script,argsSerializer,resultSerializer,keys,args);
+        return supplier.get().execute(script,argsSerializer,resultSerializer,keys,args);
     }
 
     @Override
     public Boolean hasKey(K key) {
-        return observer.select().hasKey(key);
+        return supplier.get().hasKey(key);
     }
 
     @Override
     public void delete(K key) {
-        observer.select().delete(key);
+        supplier.get().delete(key);
     }
 
     @Override
     public void delete(Collection<K> key) {
-        observer.select().delete(key);
+        supplier.get().delete(key);
     }
 
     @Override
     public DataType type(K key) {
-        return observer.select().type(key);
+        return supplier.get().type(key);
     }
 
     @Override
     public Set<K> keys(K pattern) {
-        return observer.select().keys(pattern);
+        return supplier.get().keys(pattern);
     }
 
     @Override
     public K randomKey() {
-        return observer.select().randomKey();
+        return supplier.get().randomKey();
     }
 
     @Override
     public void rename(K oldKey, K newKey) {
-        observer.select().rename(oldKey, newKey);
+        supplier.get().rename(oldKey, newKey);
     }
 
     @Override
     public Boolean renameIfAbsent(K oldKey, K newKey) {
-        return observer.select().renameIfAbsent(oldKey,newKey);
+        return supplier.get().renameIfAbsent(oldKey,newKey);
     }
 
     @Override
     public Boolean expire(K key, long timeout, TimeUnit unit) {
-        return observer.select().expire(key,timeout,unit);
+        return supplier.get().expire(key,timeout,unit);
     }
 
     @Override
     public Boolean expireAt(K key, Date date) {
-        return observer.select().expireAt(key,date);
+        return supplier.get().expireAt(key,date);
     }
 
     @Override
     public Boolean persist(K key) {
-        return observer.select().persist(key);
+        return supplier.get().persist(key);
     }
 
     @Override
     public Boolean move(K key, int dbIndex) {
-        return observer.select().move(key,dbIndex);
+        return supplier.get().move(key,dbIndex);
     }
 
     @Override
     public byte[] dump(K key) {
-        return observer.select().dump(key);
+        return supplier.get().dump(key);
     }
 
     @Override
     public void restore(K key, byte[] value, long timeToLive, TimeUnit unit) {
-        observer.select().restore(key, value, timeToLive, unit);
+        supplier.get().restore(key, value, timeToLive, unit);
     }
 
     @Override
     public Long getExpire(K key) {
-        return observer.select().getExpire(key);
+        return supplier.get().getExpire(key);
     }
 
     @Override
     public Long getExpire(K key, TimeUnit timeUnit) {
-        return observer.select().getExpire(key, timeUnit);
+        return supplier.get().getExpire(key, timeUnit);
     }
 
     @Override
     public void watch(K keys) {
-        observer.select().watch(keys);
+        supplier.get().watch(keys);
     }
 
     @Override
     public void watch(Collection<K> keys) {
-        observer.select().watch(keys);
+        supplier.get().watch(keys);
     }
 
     @Override
     public void unwatch() {
-        observer.select().unwatch();
+        supplier.get().unwatch();
     }
 
     @Override
     public void multi() {
-        observer.select().multi();
+        supplier.get().multi();
     }
 
     @Override
     public void discard() {
-        observer.select().discard();
+        supplier.get().discard();
     }
 
     @Override
     public List<Object> exec() {
-        return observer.select().exec();
+        return supplier.get().exec();
     }
 
     @Override
     public List<RedisClientInfo> getClientList() {
-        return observer.select().getClientList();
+        return supplier.get().getClientList();
     }
 
     @Override
     public List<Object> exec(RedisSerializer<?> valueSerializer) {
-        return observer.select().exec();
+        return supplier.get().exec();
     }
 
     @Override
     public void convertAndSend(String destination, Object message) {
-        observer.select().convertAndSend(destination, message);
+        supplier.get().convertAndSend(destination, message);
     }
 
     @Override
     public ValueOperations<K, V> opsForValue() {
-        return observer.select().opsForValue();
+        return supplier.get().opsForValue();
     }
 
     @Override
     public BoundValueOperations<K, V> boundValueOps(K key) {
-        return observer.select().boundValueOps(key);
+        return supplier.get().boundValueOps(key);
     }
 
     @Override
     public ListOperations<K, V> opsForList() {
-        return observer.select().opsForList();
+        return supplier.get().opsForList();
     }
 
     @Override
     public BoundListOperations<K, V> boundListOps(K key) {
-        return observer.select().boundListOps(key);
+        return supplier.get().boundListOps(key);
     }
 
     @Override
     public SetOperations<K, V> opsForSet() {
-        return observer.select().opsForSet();
+        return supplier.get().opsForSet();
     }
 
     @Override
     public BoundSetOperations<K, V> boundSetOps(K key) {
-        return observer.select().boundSetOps(key);
+        return supplier.get().boundSetOps(key);
     }
 
     @Override
     public ZSetOperations<K, V> opsForZSet() {
-        return observer.select().opsForZSet();
+        return supplier.get().opsForZSet();
     }
 
     @Override
     public HyperLogLogOperations<K, V> opsForHyperLogLog() {
-        return observer.select().opsForHyperLogLog();
+        return supplier.get().opsForHyperLogLog();
     }
 
     @Override
     public BoundZSetOperations<K, V> boundZSetOps(K key) {
-        return observer.select().boundZSetOps(key);
+        return supplier.get().boundZSetOps(key);
     }
 
     @Override
     public <HK, HV> HashOperations<K, HK, HV> opsForHash() {
-        return observer.select().opsForHash();
+        return supplier.get().opsForHash();
     }
 
     @Override
     public <HK, HV> BoundHashOperations<K, HK, HV> boundHashOps(K key) {
-        return observer.select().boundHashOps(key);
+        return supplier.get().boundHashOps(key);
     }
 
     @Override
     public List<V> sort(SortQuery<K> query) {
-        return observer.select().sort(query);
+        return supplier.get().sort(query);
     }
 
     @Override
     public <T> List<T> sort(SortQuery<K> query, RedisSerializer<T> resultSerializer) {
-        return observer.select().sort(query, resultSerializer);
+        return supplier.get().sort(query, resultSerializer);
     }
 
     @Override
     public <T> List<T> sort(SortQuery<K> query, BulkMapper<T, V> bulkMapper) {
-        return observer.select().sort(query, bulkMapper);
+        return supplier.get().sort(query, bulkMapper);
     }
 
     @Override
     public <T, S> List<T> sort(SortQuery<K> query, BulkMapper<T, S> bulkMapper, RedisSerializer<S> resultSerializer) {
-        return observer.select().sort(query, bulkMapper, resultSerializer);
+        return supplier.get().sort(query, bulkMapper, resultSerializer);
     }
 
     @Override
     public Long sort(SortQuery<K> query, K storeKey) {
-        return observer.select().sort(query,storeKey);
+        return supplier.get().sort(query,storeKey);
     }
 
     @Override
     public RedisSerializer<?> getValueSerializer() {
-        return observer.select().getValueSerializer();
+        return supplier.get().getValueSerializer();
     }
 
     @Override
     public RedisSerializer<?> getKeySerializer() {
-        return observer.select().getKeySerializer();
+        return supplier.get().getKeySerializer();
     }
 
     @Override
     public RedisSerializer<?> getHashKeySerializer() {
-        return observer.select().getHashKeySerializer();
+        return supplier.get().getHashKeySerializer();
     }
 
     @Override
     public RedisSerializer<?> getHashValueSerializer() {
-        return observer.select().getHashValueSerializer();
+        return supplier.get().getHashValueSerializer();
     }
 
     @Override
     public void killClient(String host, int port) {
-        observer.select().killClient(host,port);
+        supplier.get().killClient(host,port);
     }
 
     @Override
     public void slaveOf(String host, int port) {
-        observer.select().slaveOf(host,port);
+        supplier.get().slaveOf(host,port);
     }
 
     @Override
     public void slaveOfNoOne() {
-        observer.select().slaveOfNoOne();
+        supplier.get().slaveOfNoOne();
     }
 
 }
