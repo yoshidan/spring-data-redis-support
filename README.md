@@ -1,14 +1,10 @@
 # spring-data-redis-support
 
-標準のRedisCacheManagerは一つのRedisTemplateしか扱えないため、複数のRedisTemplateを扱えるようにします。
+## Function
+以下の機能を提供します。
 
-## Use case
-
-* RedisのMaster/Slave構成においてReadとWriteで接続先ノードを分けるRedis構成の場合に利用します。
-
- TODO 構成図
- 
-* Writerの方はVIPを利用せずにSentinelを利用しても問題ありません。
+* [RedisCacheManagerで複数のRedisTemplateを利用する](./docs/cache.md)
+* [複数のRedisから読み取り負荷分散を行う](./docs/loadbalance.md)
 
 ## How to use
 
@@ -16,10 +12,10 @@
 
 http://nysd.github.io/archivar/
 
-### Dependency 
+### Dependency
 
 * spring-data-redis-supportのバージョンはspring-data-redisのリリースバージョンに対応しています。
-* spring bootのRELEAASEバージョンが依存するspring-data-redisのバージョンのみ対応しています。
+* spring bootのRELEASEバージョンが依存するspring-data-redisのバージョンのみ対応しています。
 
 #### maven
 
@@ -27,7 +23,7 @@ http://nysd.github.io/archivar/
 <dependency>
 	<groupId>spring.support</groupId>
 	<artifactId>spring-data-redis-support</groupId>
-	<version>1.4.3</version>
+	<version>1.6.0</version>
 </dependency>
 ```
 
@@ -35,42 +31,6 @@ http://nysd.github.io/archivar/
 
 ```
 dependencies {
-    compile 'spring.support:spring-data-redis-support:1.4.3'
+    compile 'spring.support:spring-data-redis-support:1.6.0'
 }
 ```
-
-### Configuration
-
-* 以下は例です。設定値の実際はapplication.ymlに記載してspring-boot-autoconfigureのRedisProperties経由で取得するのがよいです。
-* spring-boot-autoconfigureで自動的に登録されるRedisTemplate/JedisConnectionFactoryは混乱の元なのでBean化しないことをおすすめします。
-* JedisConnectionFactoryもBeanにしておけば何もせずにspring-boot-actuatorがRead/Write双方にヘルスチェックしてくれます。
-
-```
-@Configuration
-@EnableCaching
-public class RedisConfiguraiont {
-  @Bean
-  public RedisTemplate<Object,Object> reader() {
-    RedisTemplate<Object,Object> reader = new RedisTemplate<Object,Object>();  
-    reader.setConnectionFactory(createJedisConnectionFactory("localhost",6380));
-    return reader;
-  }
-  
-  @Bean
-  public RedisTemplate<Object,Object> writer() {
-    RedisTemplate<Object,Object> writer = new RedisTemplate<Object,Object>();  
-    writer.setConnectionFactory(createJedisConnectionFactory("localhost",6379));
-    // sentinelが必要ならJedisSentinelConnectionを利用する。
-    return writer;
-  }
-  
-  @Bean
-  @Autowired
-  public CacheManager cacheManager(
-  	  @Qualifier("reader") RedisTemplate<Object,Object> reader ,
-      @Qualifier("writer") RedisTemplate<Object,Object> writer) {   
-    return new ReplicatedRedisCacheManager(reader, writer);
-  }
-}
-```
-
