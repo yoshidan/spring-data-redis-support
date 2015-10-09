@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.data.redis.ApplicationContext;
 import org.springframework.data.redis.TestRepository;
+import org.springframework.data.redis.core.RedisOperationsProxy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -22,8 +23,7 @@ public class MasterSlaveRedisCacheTest extends Assert{
   private TestRepository testRepository;
   
   @Autowired
-  @Qualifier("reader")
-  private RedisTemplate<Object,Object> reader;
+  private RedisOperationsProxy<Object,Object> reader;
   
   @Test
   public void get(){
