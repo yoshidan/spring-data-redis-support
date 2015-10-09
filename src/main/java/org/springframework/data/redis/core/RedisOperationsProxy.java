@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by yoshidan on 2015/09/28.
  */
-public class MultiConnectionRedisTemplate<K,V> implements RedisOperations<K,V> {
+public class RedisOperationsProxy<K,V> implements RedisOperations<K,V> {
 
     /** redis supplier. */
     private final RedisSupplier<K,V> supplier;
@@ -25,7 +25,7 @@ public class MultiConnectionRedisTemplate<K,V> implements RedisOperations<K,V> {
      *
      * @param supplier to set
      */
-    public MultiConnectionRedisTemplate(RandomAliveRedisSupplier<K,V> supplier) {
+    public RedisOperationsProxy(RandomAliveRedisSupplier<K, V> supplier) {
         this.supplier = supplier;
     }
 

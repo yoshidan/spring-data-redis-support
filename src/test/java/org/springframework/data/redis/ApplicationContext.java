@@ -14,7 +14,7 @@ import org.springframework.data.redis.cache.MasterSlaveRedisCacheManager;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.MultiConnectionRedisTemplate;
+import org.springframework.data.redis.core.RedisOperationsProxy;
 import org.springframework.data.redis.core.RedisState;
 import org.springframework.data.redis.core.RandomAliveRedisSupplier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,7 +38,7 @@ public class ApplicationContext {
   TestRepository testRepository;
 
   @Autowired
-  MultiConnectionRedisTemplate<Object,Object> template;
+  RedisOperationsProxy<Object,Object> template;
 
   @Autowired
   @Qualifier("writer")
@@ -81,8 +81,8 @@ public class ApplicationContext {
 
   @Bean
   @Autowired
-  public MultiConnectionRedisTemplate<Object,Object> multiReader(Collection<RedisState<Object,Object>> obs) {
-    return new MultiConnectionRedisTemplate<>(new RandomAliveRedisSupplier(obs));
+  public RedisOperationsProxy<Object,Object> multiReader(Collection<RedisState<Object,Object>> obs) {
+    return new RedisOperationsProxy<>(new RandomAliveRedisSupplier(obs));
   }
 
   @Bean
@@ -123,7 +123,7 @@ public class ApplicationContext {
   
   @Bean
   @Autowired
-  public CacheManager cacheManager(MultiConnectionRedisTemplate<Object,Object> reader ,
+  public CacheManager cacheManager(RedisOperationsProxy<Object,Object> reader ,
       @Qualifier("writer") RedisTemplate<Object,Object> writer) {
     MasterSlaveRedisCacheManager m = new MasterSlaveRedisCacheManager(writer, reader);
    // m.setDefaultExpiration(1);

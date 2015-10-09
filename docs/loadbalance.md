@@ -75,13 +75,13 @@ public class RedisConfiguraiont {
 
   @Bean
   @Autowired
-  public MultiConnectionRedisTemplate<Object,Object> multiReader(Collection<RedisState<Object,Object>> obs) {
+  public RedisOperationsProxy<Object,Object> redisOperationsProxy(Collection<RedisState<Object,Object>> obs) {
     return new MultiConnectionRedisTemplate<>(new RandomAliveRedisSupplier(obs));
   }
 
   @Bean
   @Autowired
-  public CacheManager cacheManager(MultiConnectionRedisTemplate<Object,Object> reader ,
+  public CacheManager cacheManager(RedisOperationsProxy<Object,Object> reader ,
       @Qualifier("writerRedisTemplate") RedisTemplate<Object,Object> writer) {
     return new MasterSlaveRedisCacheManager(writer, reader);
   }
