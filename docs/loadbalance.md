@@ -3,7 +3,7 @@
 * RedisのMaster/Slave構成においてRead対象ノードが複数存在する場合に利用します。
 * Writeの方はSentinelを利用してください。
 
- TODO 構成図
+ ![スクリーンショット 2015-10-10 8.27.13.png](https://qiita-image-store.s3.amazonaws.com/0/39230/96dafbd9-5759-f8dc-b6d3-6d60d004fd81.png "スクリーンショット 2015-10-10 8.27.13.png")
 
 ## 内部動作
 * RedisState単位でスレッドを起動します。
