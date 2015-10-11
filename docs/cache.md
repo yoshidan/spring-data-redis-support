@@ -2,7 +2,7 @@
 
 * RedisのMaster/Slave構成においてReadとWriteで接続先ノードを分けるRedis構成の場合に利用します。
 
- TODO 構成図
+ ![スクリーンショット 2015-10-10 8.15.56.png](https://qiita-image-store.s3.amazonaws.com/0/39230/e145ac69-f1e8-1321-8c8f-ec0a88242725.png "スクリーンショット 2015-10-10 8.15.56.png")
 
 * Writerの方はVIPを利用せずにSentinelを利用しても問題ありません。
 
