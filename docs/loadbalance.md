@@ -111,7 +111,7 @@ public Object data(@PathVariable String key){
 
 ```
 * Cacheの方はCacheManagerを利用するのでCacheableやCacheEvictがそのまま利用できます。
-* getの時だけMultiConnectionRedisTemplateが利用されます。
+* getの時だけRedisOperationsProxyが利用されます。
 
 ```
 @Repository
