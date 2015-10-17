@@ -7,8 +7,8 @@
 
 ## 内部動作
 * RedisState単位でスレッドを起動します。
-* 5秒に一回RedisStateが保持するRedisTemplate(JedisConnectionFactory)に対してpingを発行します。
-* ping結果NGの場合そのRedisStateは利用不能にマークされます。
+* 5秒に一回RedisStateが保持するRedisTemplate(JedisConnectionFactory)に対してinfo replicationを発行します。
+* info replication結果Exceptionが発生するかmaster_sync_in_progressの値が1の場合RedisStateは利用不能にマークされます。
 * Redisに対する操作時には利用可能なRedisStateからランダムで一つ選択します。
 
 ## 設定
