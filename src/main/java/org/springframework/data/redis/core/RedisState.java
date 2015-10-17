@@ -6,6 +6,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.util.StringUtils;
+
+import java.util.Properties;
 
 /**
  * Created by yoshidan on 2015/09/28.
@@ -76,12 +79,21 @@ public class RedisState<K,V> implements InitializingBean, DisposableBean{
             while(running) {
                 RedisConnection connection = RedisConnectionUtils.getConnection(factory);
                 try {
-                    connection.ping();
-                    alive = true;
+                    Properties prop = connection.info("replication");
+                    String status = prop.getProperty("master_sync_in_progress");
+                    alive = !"1".equals(status);
+                    if(!alive){
+                        if(LOGGER.isDebugEnabled()){
+                            LOGGER.error("slave full resync from master :" + prop);
+                        }else {
+                            LOGGER.error("slave full resync from master");
+                        }
+                    }
                 } catch (Throwable t) {
-                    LOGGER.error("redis connection error : " + t.getMessage());
                     if(LOGGER.isDebugEnabled()){
-                        LOGGER.debug(t.getMessage(),t);
+                        LOGGER.error("redis connection error : " + t.getMessage(),t);
+                    }else{
+                        LOGGER.error("redis connection error : " + t.getMessage());
                     }
                     alive = false;
                 } finally {
