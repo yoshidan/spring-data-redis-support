@@ -21,7 +21,7 @@
     <dependency>
         <groupId>spring.support</groupId>
         <artifactId>spring-data-redis-support</groupId>
-        <version>1.6.0</version>
+        <version>1.6.0.1</version>
     </dependency>
 </dependencies>
 ```
