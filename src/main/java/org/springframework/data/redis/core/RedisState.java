@@ -9,6 +9,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.util.StringUtils;
 
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by yoshidan on 2015/09/28.
@@ -17,17 +19,19 @@ public class RedisState<K,V> implements InitializingBean, DisposableBean{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisState.class);
 
+    private static final String SYNCHRONIZING = "1";
+
     /** redis template . */
     private final RedisTemplate<K,V> redisTemplate;
 
     /** interval msec */
-    private int checkInterval = 5000;
+    private int interval = 5000;
 
     /** alive. */
     private boolean alive = true;
 
-    /** lister thread. */
-    private Listener listener = new Listener();
+    /** lister. */
+    private Timer timer = new Timer(true);
 
     /**
      * Constructor.
@@ -46,20 +50,20 @@ public class RedisState<K,V> implements InitializingBean, DisposableBean{
     }
 
     /**
-     * @param checkInterval to set
+     * @param interval to set
      */
-    public void setCheckInterval(int checkInterval) {
-        this.checkInterval = checkInterval;
+    public void setInterval(int interval) {
+        this.interval = interval;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        listener.start();
+        timer.schedule(new Listener(),0,interval);
     }
 
     @Override
     public void destroy() throws Exception {
-        listener.running = false;
+        timer.cancel();
     }
 
     /**
@@ -69,52 +73,36 @@ public class RedisState<K,V> implements InitializingBean, DisposableBean{
         return alive;
     }
 
-    private class Listener extends Thread {
-
-        private boolean running = true;
+    private class Listener extends TimerTask {
 
         @Override
         public void run() {
-            RedisConnectionFactory factory = redisTemplate.getConnectionFactory();
-            while(running) {
-                RedisConnection connection = RedisConnectionUtils.getConnection(factory);
+
+            RedisCallbackFunction function = (connection) -> {
                 try {
                     Properties prop = connection.info("replication");
                     String status = prop.getProperty("master_sync_in_progress");
-                    alive = !"1".equals(status);
-                    if(!alive){
-                        if(LOGGER.isDebugEnabled()){
-                            LOGGER.error("slave full resync from master :" + prop);
-                        }else {
-                            LOGGER.error("slave full resync from master");
-                        }
+                    boolean ready = ! SYNCHRONIZING.equals(status);
+                    if(!ready){
+                        LOGGER.error("slave full resync from master");
                     }
+                    return ready;
                 } catch (Throwable t) {
-                    if(LOGGER.isDebugEnabled()){
-                        LOGGER.error("redis connection error : " + t.getMessage(),t);
-                    }else{
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.error("redis connection error : " + t.getMessage(), t);
+                    } else {
                         LOGGER.error("redis connection error : " + t.getMessage());
                     }
-                    alive = false;
-                } finally {
-                    RedisConnectionUtils.releaseConnection(connection, factory);
-                    sleep();
+                    return false;
                 }
-            }
-        }
+            };
+            alive = redisTemplate.execute(function);
 
-
-        /**
-         * Sleep
-         */
-        private void sleep(){
-            try {
-                Thread.sleep(checkInterval);
-            }catch(InterruptedException e){
-                LOGGER.warn(e.getMessage(),e);
-            }
         }
     }
+
+    @FunctionalInterface
+    private interface RedisCallbackFunction extends RedisCallback<Boolean> {}
 
 
 

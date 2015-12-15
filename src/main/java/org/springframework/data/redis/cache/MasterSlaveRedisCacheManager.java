@@ -5,6 +5,7 @@ package org.springframework.data.redis.cache;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.springframework.data.redis.core.RedisOperations;
 
@@ -18,7 +19,17 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
 
     /** read only operations **/
     private final RedisOperations redisReadOperations;
-	  
+
+    /** statistics enabmed **/
+    private boolean statisticsEnabled = false;
+
+    /**
+     * @param statisticsEnabled to set
+     */
+    public void setStatisticsEnabled(boolean statisticsEnabled){
+        this.statisticsEnabled = statisticsEnabled;
+    }
+
     /**
      * Construct a {@link MasterSlaveRedisCacheManager}.
      * 
@@ -47,11 +58,12 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
 	@Override
 	@SuppressWarnings("unchecked")
     protected RedisCache createCache(String cacheName) {
-      long expiration = computeExpiration(cacheName);
-      
-      return new MasterSlaveRedisCache(cacheName, 
-          (isUsePrefix() ? getCachePrefix().prefix(cacheName) : null), 
-          getRedisOperations(), expiration, redisReadOperations);      
+        long expiration = computeExpiration(cacheName);
+        MasterSlaveRedisCache cache = new MasterSlaveRedisCache(cacheName,
+            (isUsePrefix() ? getCachePrefix().prefix(cacheName) : null),
+            getRedisOperations(), expiration, redisReadOperations);
+        cache.setStatisticsEnabled(this.statisticsEnabled);
+        return cache;
     }
 
 }

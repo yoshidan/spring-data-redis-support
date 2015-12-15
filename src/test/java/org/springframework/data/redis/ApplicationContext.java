@@ -111,9 +111,9 @@ public class ApplicationContext {
     RedisTemplate<Object,Object> writer = new RedisTemplate<Object,Object>();
     RedisSentinelConfiguration sentinelConfiguration = new RedisSentinelConfiguration();
     sentinelConfiguration.master("cluster1");
-    sentinelConfiguration.addSentinel(new RedisNode("192.168.59.103",26379));
-    sentinelConfiguration.addSentinel(new RedisNode("192.168.59.103",26380));
-    sentinelConfiguration.addSentinel(new RedisNode("192.168.59.103",26381));
+    sentinelConfiguration.addSentinel(new RedisNode("192.168.99.100",26379));
+    sentinelConfiguration.addSentinel(new RedisNode("192.168.99.100",26380));
+    sentinelConfiguration.addSentinel(new RedisNode("192.168.99.100",26381));
     JedisConnectionFactory factory = new JedisConnectionFactory(sentinelConfiguration);
     factory.setUsePool(true);
     factory.afterPropertiesSet();
