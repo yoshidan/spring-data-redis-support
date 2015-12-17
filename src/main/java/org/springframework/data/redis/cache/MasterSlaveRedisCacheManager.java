@@ -5,7 +5,6 @@ package org.springframework.data.redis.cache;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.core.RedisOperations;

@@ -9,8 +9,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisOperations;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * use read only RedisOperations for get.
  * 
