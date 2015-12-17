@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.springframework.cache.Cache;
 import org.springframework.data.redis.core.RedisOperations;
 
 /**
@@ -21,13 +22,20 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
     private final RedisOperations redisReadOperations;
 
     /** statistics enabmed **/
-    private boolean statisticsEnabled = false;
+    private boolean statisticsAware = false;
 
     /**
-     * @param statisticsEnabled to set
+     * @param statisticsAware to set
      */
-    public void setStatisticsEnabled(boolean statisticsEnabled){
-        this.statisticsEnabled = statisticsEnabled;
+    public void setStatisticsAware(boolean statisticsAware){
+        this.statisticsAware = statisticsAware;
+    }
+
+    /**
+     * @return statisticsEnabled
+     */
+    public boolean isStatisticsAware(){
+        return statisticsAware;
     }
 
     /**
@@ -51,7 +59,14 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
 		super(writer,cacheNames);
 		this.redisReadOperations = reader;
 	}
-	
+
+    @Override
+    protected Cache decorateCache(Cache cache) {
+        if( isStatisticsAware() && cache instanceof StatisticsAwareCacheDecorator){
+            return super.decorateCache(cache);
+        }
+        return super.decorateCache(isStatisticsAware() ? new StatisticsAwareCacheDecorator(cache):cache);
+    }
 	/**
 	 * @see RedisCacheManager#createCache(String)
 	 */
@@ -59,11 +74,9 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
 	@SuppressWarnings("unchecked")
     protected RedisCache createCache(String cacheName) {
         long expiration = computeExpiration(cacheName);
-        MasterSlaveRedisCache cache = new MasterSlaveRedisCache(cacheName,
+        return new MasterSlaveRedisCache(cacheName,
             (isUsePrefix() ? getCachePrefix().prefix(cacheName) : null),
             getRedisOperations(), expiration, redisReadOperations);
-        cache.setStatisticsEnabled(this.statisticsEnabled);
-        return cache;
     }
 
 }
