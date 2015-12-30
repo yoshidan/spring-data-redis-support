@@ -30,7 +30,7 @@ public class RandomAliveRedisSupplier<K,V> implements RedisSupplier<K,V> {
     public RedisTemplate<K,V> get() {
         List<RedisState> aliveOnly = redisStates.stream().filter(e -> e.isAlive()).collect(Collectors.toList());
         if(aliveOnly.isEmpty()){
-            throw new RedisConnectionFailureException("no redis is available");
+            throw new RedisConnectionFailureException("no redis available");
         }
         return aliveOnly.get((int)(System.currentTimeMillis() % aliveOnly.size())).getRedisTemplate();
     }

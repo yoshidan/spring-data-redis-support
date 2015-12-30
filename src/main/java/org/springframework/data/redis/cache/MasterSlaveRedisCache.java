@@ -29,23 +29,23 @@ public class MasterSlaveRedisCache extends RedisCache{
      * @param redisOperations
      * @param expiration
      */
-	public MasterSlaveRedisCache(String name, byte[] prefix, RedisOperations<? extends Object, ? extends Object> redisOperations,
+    public MasterSlaveRedisCache(String name, byte[] prefix, RedisOperations<? extends Object, ? extends Object> redisOperations,
         long expiration,RedisOperations<? extends Object, ? extends Object> redisReadOperations) {
 	    super(name,prefix,redisOperations,expiration);
-	  
-	    this.redisReadOperations = redisReadOperations;
-	    this.cacheMetadata = new RedisCacheMetadata(name, prefix);
+
+        this.redisReadOperations = redisReadOperations;
+        this.cacheMetadata = new RedisCacheMetadata(name, prefix);
         this.cacheMetadata.setDefaultExpiration(expiration);
       
         this.cacheValueAccessor = new CacheValueAccessor(redisOperations.getValueSerializer());
 
-	}
+    }
 
-	/**
-	 * @see RedisCache#get(RedisCacheKey)
-	 */	
-	@SuppressWarnings("unchecked")
-	@Override
+    /**
+     * @see RedisCache#get(RedisCacheKey)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
     public RedisCacheElement get(final RedisCacheKey cacheKey) {
 
         notNull(cacheKey, "CacheKey must not be null!");

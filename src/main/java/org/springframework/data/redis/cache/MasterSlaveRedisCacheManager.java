@@ -46,7 +46,7 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
     public MasterSlaveRedisCacheManager(RedisOperations writer , RedisOperations reader) {
 		this(writer, reader,Collections.<String> emptyList());
     }
-	
+
     /**
      * Construct a static {@link MasterSlaveRedisCacheManager}, managing caches for the specified cache names only.
      * 
@@ -54,10 +54,10 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
      * @param reader for read data     
      * @param cacheNames
      */
-	public MasterSlaveRedisCacheManager(RedisOperations writer, RedisOperations reader,Collection<String> cacheNames) {
-		super(writer,cacheNames);
-		this.redisReadOperations = reader;
-	}
+    public MasterSlaveRedisCacheManager(RedisOperations writer, RedisOperations reader,Collection<String> cacheNames) {
+        super(writer,cacheNames);
+        this.redisReadOperations = reader;
+    }
 
     @Override
     protected Cache decorateCache(Cache cache) {
@@ -66,11 +66,12 @@ public class MasterSlaveRedisCacheManager extends RedisCacheManager{
         }
         return super.decorateCache(isStatisticsAware() ? new StatisticsAwareCacheDecorator(cache):cache);
     }
-	/**
-	 * @see RedisCacheManager#createCache(String)
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
+
+    /**
+     * @see RedisCacheManager#createCache(String)
+     */
+    @Override
+    @SuppressWarnings("unchecked")
     protected RedisCache createCache(String cacheName) {
         long expiration = computeExpiration(cacheName);
         return new MasterSlaveRedisCache(cacheName,
